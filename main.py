@@ -16,11 +16,15 @@ X_data = np.empty(view_num, dtype=object)
 for view_idx in range(view_num):
     X_data[view_idx] = np.squeeze(np.array(data['X'][view_idx], dtype=np.float64)).transpose() # mxn
     print('feature dimension of ' + str(view_idx+1) + '-th view =', X_data[view_idx].shape[0])
+
 Y = np.squeeze(np.array(data['Y'], dtype=np.float64)).transpose() # n*1
 print('the number of samples = ', Y.shape)
 
+class_num = len(set(Y))
+print('class_num = ', class_num)
+
 # 创建MvNMF对象
-model = MvNMF(X_data, dim=40, max_iter=500, init_mth=False)
+model = MvNMF(X_data, dim=class_num, max_iter=500, init_mth=False)
 model.normlize_data() # 数据标准化
 
 # 定义聚类指标
@@ -34,7 +38,7 @@ obj = []
 for i in range(10):
     V, obj_val, cnt= model.update_MvNMF()
     # 计算聚类指标
-    y_pred = KMeans(n_clusters=40).fit_predict(V.transpose())+1
+    y_pred = KMeans(n_clusters=class_num).fit_predict(V.transpose())+1
     err_cnt.append(cnt)
     obj.append(obj_val)
     ACC.append(calc_ACC(Y, y_pred))
